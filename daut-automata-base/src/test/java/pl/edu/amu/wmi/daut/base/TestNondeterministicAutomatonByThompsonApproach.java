@@ -481,6 +481,65 @@ public class TestNondeterministicAutomatonByThompsonApproach extends TestCase {
         assertTrue(automaton.accepts("NOOOOOOO!!!"));
     }
 
+    /*
+     * Automat z epsilon-przejściami I
+     * Arkadiusz Sikorski
+     */
+    public final void testNondeterministicAutomatonWithEpsilonTransitionI() {
+        final AutomatonSpecification spec = new NaiveAutomatonSpecification();
+
+        State qStart = spec.addState();
+        State q3S = spec.addState();
+        State q2S = spec.addState();
+        State qA = spec.addState();
+        State qBorA = spec.addState();
+        State qC = spec.addState();
+        State qOneMoreA = spec.addState();
+        State q3SCompleted = spec.addState();
+        State q2SCompleted = spec.addState();
+        State qEndOfAll = spec.addState();
+
+        spec.markAsInitial(qStart);
+        spec.markAsFinal(qEndOfAll);
+
+        spec.addTransition(qStart, q3S, new EpsilonTransitionLabel());
+        spec.addTransition(qStart, q2S, new EpsilonTransitionLabel());
+        spec.addTransition(q3S, qA, new CharTransitionLabel('a'));
+        spec.addTransition(q3S, qBorA, new CharTransitionLabel('b'));
+        spec.addTransition(qA, qBorA, new EpsilonTransitionLabel());
+        spec.addTransition(qA, qOneMoreA, new CharTransitionLabel('a'));
+        spec.addTransition(qBorA, qOneMoreA, new CharTransitionLabel('b'));
+        spec.addTransition(qOneMoreA, q3SCompleted, new CharTransitionLabel('a'));
+        spec.addTransition(q3SCompleted, qEndOfAll, new EpsilonTransitionLabel());
+        spec.addTransition(q2S, qC, new CharTransitionLabel('c'));
+        spec.addTransition(qC, q2SCompleted, new CharTransitionLabel('c'));
+        spec.addTransition(q2SCompleted, qEndOfAll, new EpsilonTransitionLabel());
+
+        final NondeterministicAutomatonByThompsonApproach automaton =
+                new NondeterministicAutomatonByThompsonApproach(spec);
+
+        assertTrue(automaton.accepts("aaa"));
+        assertTrue(automaton.accepts("aba"));
+        assertTrue(automaton.accepts("bba"));
+        assertTrue(automaton.accepts("cc"));
+
+        assertFalse(automaton.accepts("aca"));
+        assertFalse(automaton.accepts("aaaa"));
+        assertFalse(automaton.accepts("aa"));
+        assertFalse(automaton.accepts(""));
+        assertFalse(automaton.accepts("ccc"));
+        assertFalse(automaton.accepts("c"));
+        assertFalse(automaton.accepts("bbb"));
+        assertFalse(automaton.accepts("bb"));
+        assertFalse(automaton.accepts("bbc"));
+        assertFalse(automaton.accepts("baa"));
+        assertFalse(automaton.accepts("abb"));
+        assertFalse(automaton.accepts("a"));
+        assertFalse(automaton.accepts("b"));
+        assertFalse(automaton.accepts("c"));
+        assertFalse(automaton.accepts("#"));
+    }
+	
   /**
      * Ósmy test (automat z przynajmniej jednym epsilon-przejściem
      * akceptujący wszystkie napisy złożone z napisu "abcd"
